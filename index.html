@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EcoSim - 生态演替模拟器</title>
-    <!-- 引入本地库资源 (不再依赖外部 CDN，实现秒开) -->
-    <script src="./lib/tailwind.min.js"></script>
+    <!-- 优先尝试加载本地 Tailwind，失败则回退到 CDN -->
+    <script src="./lib/tailwind.min.js" onerror="var s=document.createElement('script');s.src='https://cdn.tailwindcss.com';document.head.appendChild(s);"></script>
     <style>
         body {
             background-color: #000;
@@ -179,12 +179,11 @@
         </div>
     </div>
 
-    <!-- 库依赖 (按照要求使用本地副本路径) -->
-    <script src="./lib/vue.global.prod.js"></script>
-    <script src="./lib/gpu-browser.min.js"></script>
-    <script src="./lib/chart.js"></script>
-    <!-- Lucide 图标库 (本地版) -->
-    <script src="./lib/lucide.min.js"></script>
+    <!-- 库依赖 (本地优先策略) -->
+    <script src="./lib/vue.global.prod.js" onerror="var s=document.createElement('script');s.src='https://unpkg.com/vue@3/dist/vue.global.prod.js';document.body.appendChild(s);"></script>
+    <script src="./lib/gpu-browser.min.js" onerror="var s=document.createElement('script');s.src='https://unpkg.com/gpu.js@latest/dist/gpu-browser.min.js';document.body.appendChild(s);"></script>
+    <script src="./lib/chart.js" onerror="var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/chart.js/dist/chart.min.js';document.body.appendChild(s);"></script>
+    <script src="./lib/lucide.min.js" onerror="var s=document.createElement('script');s.src='https://unpkg.com/lucide@latest/dist/umd/lucide.min.js';document.body.appendChild(s);"></script>
     
     <!-- 业务代码 -->
     <script src="main.js"></script>
