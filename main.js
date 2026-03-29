@@ -104,6 +104,9 @@ class EcoSimulator {
     }
 
     step() {
+        // 环境随机性：模拟年度气候波动 (±15%)
+        const yearlyFluctuation = 1.0 + (Math.random() * 0.3 - 0.15);
+        
         const climateMults = {
             '热带雨林气候': [1.0, 1.0, 1.0, 1.0, 1.0],
             '温带草原气候': [1.0, 1.0, 1.0, 0.2, 0.0],
@@ -111,8 +114,16 @@ class EcoSimulator {
             '温带落叶林气候': [0.8, 0.8, 0.8, 0.8, 0.8],
             '荒漠气候': [1.0, 0.2, 0.05, 0.0, 0.0]
         };
-        const currentMults = climateMults[this.currentClimate] || climateMults['热带雨林气候'];
+        const currentMults = (climateMults[this.currentClimate] || climateMults['热带雨林气候']).map(m => m * yearlyFluctuation);
+        
         this.stepCPU(currentMults);
+
+        // 随机小规模扰动：模拟自然林隙或局部灾害 (0.5% 概率)
+        if (Math.random() < 0.005) {
+            const rx = Math.floor(Math.random() * this.width);
+            const ry = Math.floor(Math.random() * this.height);
+            this.applyDisturbance(rx, ry, 3, [0.2, 0.3, 0.5, 0.7, 0.8], 0.2); // 越高级的物种受损越明显
+        }
     }
 
     stepCPU(climateMults) {
@@ -135,7 +146,9 @@ class EcoSimulator {
                 for (let k = 0; k < ns; k++) totalB += this.biomass[idx + k];
 
                 for (let k = 0; k < ns; k++) {
-                    let sk = this.seedBank[idx + k] + CONFIG.bgSeed[k];
+                    // 随机背景种子输入 (±50% 波动)
+                    const randRain = 0.5 + Math.random();
+                    let sk = this.seedBank[idx + k] + CONFIG.bgSeed[k] * randRain;
                     
                     const kernelInfo = this.precomputedKernels[k];
                     let dispersed = 0;
