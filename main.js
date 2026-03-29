@@ -388,7 +388,10 @@ createApp({
             render();
         };
 
-        onMounted(() => init());
+        onMounted(() => {
+            console.log("%c EcoSim v2.1 %c Built By LiuSonWood And YanYiLin ", "color: #fff; background: #1B4332; padding: 4px; border-radius: 4px 0 0 4px; font-weight: bold;", "color: #fff; background: #468843; padding: 4px; border-radius: 0 4px 4px 0;");
+            init();
+        });
 
         return {
             simulator, canvasRef, chartRef, state, climates,
