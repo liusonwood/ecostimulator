@@ -20,6 +20,20 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 12px;
         }
+        /* 自定义滚动条样式 */
+        .custom-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.02);
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
         .aspect-16-9 {
             aspect-ratio: 16 / 9;
             max-height: 90vh;
@@ -83,7 +97,7 @@
             </div>
 
             <!-- 右上模块：控制面板 (Control Panel) -->
-            <div class="col-span-4 row-span-4 glass p-6 flex flex-col gap-6">
+            <div class="col-span-4 row-span-4 glass p-6 flex flex-col gap-6 overflow-y-auto custom-scroll">
                 <div class="flex items-center justify-between">
                     <h1 class="text-3xl font-black tracking-tighter text-white/90">ECOSIM</h1>
                     <div class="text-sm font-mono text-white/50">v2.0-GPU</div>
