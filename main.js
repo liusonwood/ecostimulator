@@ -27,10 +27,10 @@ const CONFIG = {
     nu: [0.045, 0.06, 0.18, 0.12, 0.06],
     K_base: [0.3, 0.4, 0.7, 0.8, 0.95], // 高等物种拥有更高的环境容纳量
     alpha: [
-        [1.0, 1.2, 2.0, 2.5, 3.0], // 地衣被所有物种强烈抑制（尤其是乔木遮荫）
-        [0.4, 1.0, 1.5, 2.0, 2.5], // 苔藓受更高物种抑制
-        [0.2, 0.3, 1.0, 1.5, 2.0], // 草本受灌木/乔木抑制
-        [0.1, 0.1, 0.2, 1.0, 1.5], // 灌木受乔木抑制
+        [1.0, 1.15, 2.0, 2.5, 3.3], // 地衣被所有物种强烈抑制（尤其是乔木遮荫）
+        [0.4, 1.0, 1.5, 2.0, 2.8], // 苔藓受更高物种抑制
+        [0.2, 0.3, 1.0, 1.5, 2.3], // 草本受灌木/乔木抑制
+        [0.1, 0.1, 0.2, 1.0, 1.6], // 灌木受乔木抑制
         [0.01, 0.01, 0.05, 0.1, 1.0] // 乔木几乎不受早期演替种的影响
     ],
 
@@ -152,7 +152,7 @@ class EcoSimulator {
                     
                     // Step C: Germination with Succession Thresholds
                     // 极大幅提高门槛：先锋种必须积累足够生物量 (象征土壤有机质积累)
-                    const thresholds = [0.0, 0.1, 0.4, 0.7, 0.85]; 
+                    const thresholds = [0.0, 0.1, 0.4, 0.73, 0.85]; 
                     let g_eff = CONFIG.g[k] * Math.max(0, 1 - totalB);
                     if (totalB < thresholds[k]) g_eff = 0; // Succession barrier: blocked if soil not ready
 
@@ -376,9 +376,9 @@ createApp({
             if (!simulator.value) return;
             const cx = CONFIG.gridWidth / 2;
             const cy = CONFIG.gridHeight / 2;
-            if (type === 'fire') simulator.value.applyDisturbance(cx, cy, 15, [0, 0, 0.95, 0.6, 0.5], 0.5);
+            if (type === 'fire') simulator.value.applyDisturbance(cx, cy, 15, [0, 0, 0.95, 0.6, 0.9], 0.5);
             else if (type === 'volcano') simulator.value.applyDisturbance(cx, cy, 20, [1, 1, 1, 1, 1], 1);
-            else if (type === 'drought') simulator.value.applyDisturbance(cx, cy, 40, [0.1, 0.2, 0.5, 0.2, 0.1], 0.1);
+            else if (type === 'drought') simulator.value.applyDisturbance(cx, cy, 40, [0.1, 0.2, 0.5, 0.2, 0.6], 0.1);
             render();
         };
 
