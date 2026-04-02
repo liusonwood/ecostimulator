@@ -344,11 +344,13 @@ createApp({
                         ctx.lineWidth = 1;
                         ctx.strokeRect(gx * cw, gy * ch, cw, ch);
 
-                        // 绘制主导物种图标
+                        // 绘制主导物种图标，其尺寸随所在的格子该物种数量（盖度）动态缩放
                         if (dominantK !== -1 && maxB > 0.05) {
                             ctx.save();
-                            ctx.globalAlpha = 0.5; // 适度透明，保持背景色可见
-                            ctx.font = `${Math.min(cw, ch) * 0.5}px Arial`;
+                            ctx.globalAlpha = 0.6; // 稍微增加不透明度以突出图标
+                            // 动态计算尺寸：基础 0.2 + 比例 0.8 * 生物量
+                            const dynamicSize = Math.min(cw, ch) * (0.2 + 1.5 * maxB);
+                            ctx.font = `${dynamicSize}px Arial`;
                             ctx.textAlign = 'center';
                             ctx.textBaseline = 'middle';
                             ctx.fillText(CONFIG.icons[dominantK], gx * cw + cw / 2, gy * ch + ch / 2);
