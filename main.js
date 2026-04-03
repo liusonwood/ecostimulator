@@ -25,7 +25,7 @@ const CONFIG = {
     // 物种生物学参数 (按 [地衣, 苔藓, 草本, 灌木, 乔木] 顺序排列)
     rho: [30.0, 100.0, 50.0, 200.0, 80.0],       // 繁殖力 (ρ)：单位盖度每年产生的种子数
     lambda: [0.5, 0.8, 1.5, 3.0, 6.0],           // 扩散距离 (λ)：种子扩散的标准差 (单位: 格子)
-    R_max: 6.0,                                  // 最大扩散半径：计算扩散时的截断距离 (格子数)
+    R_max: 9.0,                                  // 最大扩散半径：计算扩散时的截断距离 (格子数)
     r: [0.3, 0.4, 0.3, 0.6, 0.2],                // 增长率 (r)：物种的最大年增长速度
     g: [0.15, 0.2, 0.6, 0.4, 0.4],               // 萌发率 (g)：种子在空白处成功萌发的概率
     s: [0.6, 0.6, 0.2, 0.7, 0.6],                // 种子库存活率 (s)：未萌发种子的年存活率
@@ -35,7 +35,7 @@ const CONFIG = {
     // 竞争矩阵 (alpha[k][l])：物种 l 对物种 k 的抑制系数
     alpha: [
         [1.0, 1.2, 2.0, 2.5, 3.3], // 地衣受其他物种抑制强 (遮荫效应)
-        [0.4, 1.0, 0.9, 2.0, 2.8],  // 苔藓受更高阶物种抑制
+        [0.4, 1.0, 0.5, 1.8, 2.3],  // 苔藓受更高阶物种抑制
         [0.2, 0.25, 1.0, 1.5, 3.4],  // 草本受灌木/乔木抑制
         [0.1, 0.1, 0.2, 1.0, 1.5],  // 灌木受乔木抑制
         [0.01, 0.01, 0.05, 0.1, 1.0] // 乔木 (顶极种) 几乎不受早期物种影响
@@ -617,9 +617,12 @@ createApp({
                         ctx.fillRect(px, py, cw, ch);
                         ctx.strokeRect(px, py, cw, ch);
 
-                        if (dominantK !== -1 && maxB > 0.05) {
+                        if (dominantK !== -1) {
                             ctx.globalAlpha = 0.6;
-                            const fontSize = minCellSize * (0.1 + 1.2 * maxB);
+                            // 草本 (dominantK === 2) 的图标大小保持恒定，其他物种随盖度变化
+                            const fontSize = (dominantK === 2) 
+                                ? minCellSize * 0.7 
+                                : minCellSize * (0.3 + 0.7 * maxB);
                             ctx.font = `${fontSize}px Arial`;
                             ctx.fillText(CONFIG.icons[dominantK], centerX, centerY);
                             ctx.globalAlpha = 1.0;
@@ -637,7 +640,7 @@ createApp({
                     const icon = d.type === 'fire' ? '🔥' : '🌋';
                     const scale = d.type === 'volcano' ? 3 : 1.5;
                     const size = minCellSize * scale * (1 + Math.sin(progress * Math.PI) * 0.2);
-                    ctx.font = `${size}px Arial`;
+                    ctx.font = `${size}px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", "Arial", sans-serif`;
                     ctx.globalAlpha = 0.8 * Math.pow(1 - progress, 0.5);
                     ctx.fillText(icon, d.x * cw + cw / 2, d.y * ch + ch / 2);
                 }
@@ -694,6 +697,9 @@ createApp({
                     responsive: true,
                     maintainAspectRatio: false,
                     animation: false,
+                    font: {
+                        family: '"Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", "Arial", sans-serif'
+                    },
                     interaction: { mode: 'index', intersect: false },
                     scales: {
                         y: { beginAtZero: true, max: 100, grid: { color: '#333' }, ticks: { color: '#888' } },
@@ -703,8 +709,8 @@ createApp({
                         legend: { display: false },
                         tooltip: {
                             backgroundColor: 'rgba(13, 13, 13, 0.9)',
-                            titleFont: { size: 13, weight: 'bold' },
-                            bodyFont: { size: 12 },
+                            titleFont: { size: 13, weight: 'bold', family: '"Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", "Arial", sans-serif' },
+                            bodyFont: { size: 12, family: '"Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", "Arial", sans-serif' },
                             padding: 10,
                             borderColor: 'rgba(255, 255, 255, 0.1)',
                             borderWidth: 1,
@@ -751,13 +757,13 @@ createApp({
             let radius = 5;
             if (type === 'fire') {
                 radius = 5;
-                simulator.value.applyDisturbance(cx, cy, radius, [0.4, 0.5, 0.7, 0.99, 1.0], 0.8);
+                simulator.value.applyDisturbance(cx, cy, radius, [0.4, 0.5, 0.7, 0.99, 1.0], 0.9);
             } else if (type === 'volcano') {
                 radius = 17;
                 simulator.value.applyDisturbance(cx, cy, radius, [1, 1, 1, 1, 1], 1);
             } else if (type === 'drought') {
                 radius = 40;
-                simulator.value.applyDisturbance(cx, cy, radius, [0.1, 0.2, 0.5, 0.2, 0.6], 0.1);
+                simulator.value.applyDisturbance(cx, cy, radius, [0.2, 0.3, 0.6, 0.3, 0.7], 0.2);
             }
             state.visualDisturbances.push({ x: cx, y: cy, radius, type, startTime: Date.now(), duration: 1500 });
         };
