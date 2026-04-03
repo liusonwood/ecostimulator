@@ -851,7 +851,7 @@ createApp({
         };
 
         onMounted(() => {
-            console.log("%c EcoSim v3.1 %c Built By LiuSonWood And YanYiLin ", "color: #fff; background: #1B4332; padding: 4px; border-radius: 4px 0 0 4px; font-weight: bold;", "color: #fff; background: #468843; padding: 4px; border-radius: 0 4px 4px 0;");
+            console.log("%c EcoSim v3.2 %c Built By LiuSonWood And YanYiLin ", "color: #fff; background: #1B4332; padding: 4px; border-radius: 4px 0 0 4px; font-weight: bold;", "color: #fff; background: #468843; padding: 4px; border-radius: 0 4px 4px 0;");
             console.log("%c >  GitHub 项目地址：https://github.com/liusonwood/ecosimulator", "color: #777; font-style: italic;");
             
             // 暴露切换接口给控制台
