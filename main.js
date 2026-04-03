@@ -14,8 +14,8 @@ const CONFIG = {
     speciesNames: ['地衣', '苔藓', '草本', '灌木', '乔木'],
     colors: [                   // 各物种在地图上显示的颜色 (十六进制)
         '#6E7C88', // 地衣 (先锋种)
-        '#709f2f', // 苔藓 (地被种)
-        '#41aa46', // 草本 (竞争种)
+        '#81b736', // 苔藓 (地被种)
+        '#3a9e3f', // 草本 (竞争种)
         '#3e773b', // 灌木 (过渡种)
         '#1B4332'  // 乔木 (顶极种)
     ],
@@ -577,7 +577,7 @@ createApp({
             const ch = canvas.height / height;
             const minCellSize = Math.min(cw, ch);
 
-            ctx.fillStyle = '#111';
+            ctx.fillStyle = '#171717';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
