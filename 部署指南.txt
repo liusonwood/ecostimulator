@@ -9,6 +9,7 @@ EcoSim 生态模拟器 - 部署指南 (Deployment Guide)
 在上传到服务器前，请确保包含以下完整目录结构：
 .
 ├── index.html          # 主页面入口
+├── favicon.ico          # 网页地址栏图标
 ├── main.js             # 模拟逻辑与 UI 控制
 ├── wokers.js           # 负责并行执行 CPU 演替逻辑
 └──lib/                 # 关键第三方库本地备份 (Vue, GPU.js, Chart.js, Lucide)
