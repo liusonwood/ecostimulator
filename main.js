@@ -40,7 +40,7 @@ const CONFIG = {
         [0.2, 0.3, 1.0, 1.5, 3.4, 1.0], // 草本
         [0.1, 0.1, 0.3, 1.0, 1.3, 0.3], // 灌木
         [0.01, 0.01, 0.05, 0.1, 1.0, 0.05], // 乔木
-        [0.2, 0.3, 1.0, 1.5, 3.4, 1.0]  // 农作物
+        [0.2, 0.3, 1.3, 1.5, 3.4, 1.0]  // 农作物
     ],
 
     // 土壤响应乘子 (soilMult[k][depth])：不同土壤深度对 K 的修正修正系数
@@ -96,11 +96,11 @@ class EcoSimulator {
                     // 边界生成混合植被: 草本 (index 2) 为主，少量灌木 (index 3) 和苔藓 (index 1)
                     const isBorder = (x === 0 || x === this.width - 1 || y === 0 || y === this.height - 1);
                     if (isBorder) {
-                        this.biomass[idx + 2] = 0.4 + Math.random() * 0.3; // 草本
-                        this.biomass[idx + 1] = 0.1 + Math.random() * 0.2; // 苔藓
-                        this.biomass[idx + 3] = 0.05 + Math.random() * 0.1; // 灌木
+                        this.biomass[idx + 2] = 0.5 + Math.random() * 0.2; // 草本
+                        this.biomass[idx + 1] = 0.05 + Math.random() * 0.1; // 苔藓
+                        this.biomass[idx + 3] = 0.0 + Math.random() * 0; // 灌木
                     } else {
-                        this.biomass[idx + 5] = 0.8 + Math.random() * 0.2; 
+                        this.biomass[idx + 5] = 0.44 + Math.random() * 0.1; 
                     }
                 }
             }
@@ -326,7 +326,7 @@ class EcoSimulator {
             '农场': [1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
             '温带草原气候': [1.0, 1.3, 1.0, 0.2, 0.0, 1.0],
             '寒带苔原气候': [1.0, 1.0, 0.3, 0.0, 0.0, 0.3],
-            '荒漠气候': [1.0, 0.38, 0.05, 0.0, 0.0, 0.05]
+            '荒漠气候': [1.0, 0.2, 0.05, 0.0, 0.0, 0.05]
         };
         const currentMults = (climateMults[this.currentClimate] || climateMults['热带雨林气候']).map(m => m * yearlyFluctuation);
         
@@ -517,9 +517,27 @@ class EcoSimulator {
             }
         }
     }
+    //生成农田
+    addRandomFarmland() {
+        const fw = Math.floor(Math.random() * (this.width / 3)) + 8; // 随机宽度
+        const fh = Math.floor(Math.random() * (this.height / 3)) + 6; // 随机高度
+        const startX = Math.floor(Math.random() * (this.width - fw));
+        const startY = Math.floor(Math.random() * (this.height - fh));
+
+        for (let y = startY; y < startY + fh; y++) {
+            for (let x = startX; x < startX + fw; x++) {
+                const idx = (y * this.width + x) * this.numSpecies;
+                for (let k = 0; k < this.numSpecies; k++) {
+                    this.biomass[idx + k] = 0;
+                    this.seedBank[idx + k] = 0;
+                }
+                this.biomass[idx + 5] = 0.9 + Math.random() * 0.1; // 种植农作物
+            }
+        }
+    }
 }
 
-const { createApp, ref, onMounted, reactive } = Vue;
+const { createApp, ref, onMounted, reactive, watch } = Vue;
 
 createApp({
     setup() {
@@ -535,6 +553,17 @@ createApp({
             climate: '热带雨林气候',
             hoverData: null,
             visualDisturbances: []
+        });
+
+        // 监听气候变化：如果在第 0 年切换气候，自动重置以应用特定初始状态；
+        // 如果在演替过程中切换为农场，则随机生成一块农田。
+        watch(() => state.climate, (newClimate) => {
+            if (state.year === 0 && !state.running) {
+                init();
+            } else if (newClimate === '农场' && simulator.value) {
+                simulator.value.addRandomFarmland();
+                updateChart();
+            }
         });
 
         const climates = ['热带雨林气候', '温带草原气候', '寒带苔原气候', '荒漠气候', '农场'];
