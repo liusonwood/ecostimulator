@@ -97,7 +97,8 @@
                 <!-- Tooltip -->
                 <div v-if="state.hoverData" class="tooltip" :style="{ left: '10px', top: '10px' }">
                     <div class="font-bold border-b border-white/20 mb-1 pb-1">
-                        坐标: {{ state.hoverData.x }}, {{ state.hoverData.y }} | 土壤: {{ state.hoverData.soil }}
+                        坐标: {{ state.hoverData.x }}, {{ state.hoverData.y }} 
+                    </br> 土壤: {{ state.hoverData.soil }}
                     </div>
                     <div v-for="s in state.hoverData.species" :key="s.name" class="flex justify-between gap-4">
                         <span>{{ s.name }}:</span>
