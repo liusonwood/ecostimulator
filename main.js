@@ -36,8 +36,8 @@ const CONFIG = {
     // 竞争矩阵 (alpha[k][l])：物种 l 对物种 k 的抑制系数
     alpha: [
         [1.0, 1.2, 2.0, 2.5, 3.3, 2.0], // 地衣
-        [0.4, 1.0, 1.0, 1.8, 2.3, 1.0], // 苔藓
-        [0.2, 0.3, 1.0, 1.5, 3.4, 1.0], // 草本
+        [0.4, 1.0, 1.2, 1.8, 2.3, 1.0], // 苔藓
+        [0.2, 0.3, 1.0, 1.6, 3.4, 1.0], // 草本
         [0.1, 0.1, 0.3, 1.0, 1.3, 0.3], // 灌木
         [0.01, 0.01, 0.05, 0.1, 1.0, 0.05], // 乔木
         [0.2, 0.3, 1.3, 1.5, 3.4, 1.0]  // 农作物
@@ -715,8 +715,7 @@ createApp({
             const rect = canvasRef.value.getBoundingClientRect();
             const x = Math.floor((e.clientX - rect.left) / (rect.width / CONFIG.gridWidth));
             const y = Math.floor((e.clientY - rect.top) / (rect.height / CONFIG.gridHeight));
-            const radius = 5;
-            simulator.value.applyDisturbance(x, y, radius, [0, 0, 0.95, 0.6, 0.5, 0.95], 0.5);
+            applyDisturbance('fire', x, y);
         };
 
         const handleMouseMove = (e) => {
@@ -744,6 +743,15 @@ createApp({
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
             if (chart) chart.destroy();
+
+            // 自定义 Tooltip 位置：始终显示在鼠标右侧
+            Chart.Tooltip.positioners.leftSide = function(items, eventPosition) {
+                return {
+                    x: eventPosition.x - 80,
+                    y: chart.chartArea.top + 10
+                };
+            };
+
             chart = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -773,9 +781,12 @@ createApp({
                     plugins: { 
                         legend: { display: false },
                         tooltip: {
-                            backgroundColor: 'rgba(13, 13, 13, 0.9)',
+                            position: 'leftSide',
+                            backgroundColor: 'rgba(13, 13, 13, 0.55)',
                             titleFont: { size: 13, weight: 'bold' },
+                            titleColor: 'rgba(255, 255, 255, 0.79)',
                             bodyFont: { size: 12 },
+                            bodyColor: 'rgba(255, 255, 255, 0.65)',
                             padding: 10,
                             borderColor: 'rgba(255, 255, 255, 0.1)',
                             borderWidth: 1,
@@ -821,10 +832,10 @@ createApp({
             chart.update('none');
         };
 
-        const applyDisturbance = (type) => {
+        const applyDisturbance = (type, x = null, y = null) => {
             if (!simulator.value) return;
-            const cx = CONFIG.gridWidth / 2;
-            const cy = CONFIG.gridHeight / 2;
+            const cx = x !== null ? x : CONFIG.gridWidth / 2;
+            const cy = y !== null ? y : CONFIG.gridHeight / 2;
             let radius = 5;
             if (type === 'fire') {
                 radius = 5;
