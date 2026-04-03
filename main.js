@@ -10,51 +10,54 @@
 const CONFIG = {
     gridWidth: 20,              // 网格宽度 (格子数)
     gridHeight: 13,             // 网格高度 (格子数)
-    numSpecies: 5,              // 功能型物种总数 (地衣, 苔藓, 草本, 灌木, 乔木)
-    speciesNames: ['地衣', '苔藓', '草本', '灌木', '乔木'],
+    numSpecies: 6,              // 功能型物种总数 (地衣, 苔藓, 草本, 灌木, 乔木, 农作物)
+    speciesNames: ['地衣', '苔藓', '草本', '灌木', '乔木', '农作物'],
     colors: [                   // 各物种在地图上显示的颜色 (十六进制)
         '#6E7C88', // 地衣 (先锋种)
         '#81b736', // 苔藓 (地被种)
         '#3a9e3f', // 草本 (竞争种)
         '#3e773b', // 灌木 (过渡种)
-        '#1B4332'  // 乔木 (顶极种)
+        '#1B4332', // 乔木 (顶极种)
+        '#FFD700'  // 农作物 (金黄色)
     ],
-    bgSeed: [0.002, 0.0000001, 0.000005, 0.0000001, 0.0000005], // 背景种子雨：每年随机落入格子的种子量 (模拟远距离传播)
-    initialSeed: [0.00001, 0.0, 0.0, 0.0, 0.0],                   // 初始种子库：t=0 时各格子的预置种子量
+    bgSeed: [0.002, 0.0000001, 0.000005, 0.0000001, 0.0000005, 0.0], // 背景种子雨：每年随机落入格子的种子量 (模拟远距离传播)
+    initialSeed: [0.00001, 0.0, 0.0, 0.0, 0.0, 0.0],                   // 初始种子库：t=0 时各格子的预置种子量
     
-    // 物种生物学参数 (按 [地衣, 苔藓, 草本, 灌木, 乔木] 顺序排列)
-    rho: [30.0, 100.0, 50.0, 200.0, 80.0],       // 繁殖力 (ρ)：单位盖度每年产生的种子数
-    lambda: [0.5, 0.8, 1.5, 4.0, 6.0],           // 扩散距离 (λ)：种子扩散的标准差 (单位: 格子)
+    // 物种生物学参数 (按 [地衣, 苔藓, 草本, 灌木, 乔木, 农作物] 顺序排列)
+    rho: [30.0, 100.0, 50.0, 200.0, 80.0, 50.0],       // 繁殖力 (ρ)：单位盖度每年产生的种子数
+    lambda: [0.5, 0.8, 1.5, 4.0, 6.0, 1.5],           // 扩散距离 (λ)：种子扩散的标准差 (单位: 格子)
     R_max: 9.0,                                  // 最大扩散半径：计算扩散时的截断距离 (格子数)
-    r: [0.3, 0.4, 0.3, 0.6, 0.2],                // 增长率 (r)：物种的最大年增长速度
-    g: [0.15, 0.4, 0.6, 0.4, 0.4],               // 萌发率 (g)：种子在空白处成功萌发的概率
-    s: [0.6, 0.6, 0.2, 0.7, 0.6],                // 种子库存活率 (s)：未萌发种子的年存活率
-    nu: [0.045, 0.06, 0.1, 0.12, 0.06],         // 库萌发率 (ν)：种子库中种子后续萌发的概率
-    K_base: [0.3, 0.46, 0.7, 0.8, 0.95],          // 基础承载力 (K)：物种能达到的最大理论盖度
+    r: [0.3, 0.4, 0.3, 0.6, 0.2, 0.3],                // 增长率 (r)：物种的最大年增长速度
+    g: [0.15, 0.4, 0.6, 0.4, 0.4, 0.6],               // 萌发率 (g)：种子在空白处成功萌发的概率
+    s: [0.6, 0.6, 0.2, 0.7, 0.6, 0.2],                // 种子库存活率 (s)：未萌发种子的年存活率
+    nu: [0.045, 0.06, 0.1, 0.12, 0.06, 0.1],         // 库萌发率 (ν)：种子库中种子后续萌发的概率
+    K_base: [0.3, 0.46, 0.7, 0.8, 0.95, 0.7],          // 基础承载力 (K)：物种能达到的最大理论盖度
     
     // 竞争矩阵 (alpha[k][l])：物种 l 对物种 k 的抑制系数
     alpha: [
-        [1.0, 1.2, 2.0, 2.5, 3.3], // 地衣受其他物种抑制强 (遮荫效应)
-        [0.4, 1.0, 1.0, 1.8, 2.3],  // 苔藓受更高阶物种抑制
-        [0.2, 0.3, 1.0, 1.5, 3.4],  // 草本受灌木/乔木抑制
-        [0.1, 0.1, 0.3, 1.0, 1.3],  // 灌木受乔木抑制
-        [0.01, 0.01, 0.05, 0.1, 1.0] // 乔木 (顶极种) 几乎不受早期物种影响
+        [1.0, 1.2, 2.0, 2.5, 3.3, 2.0], // 地衣
+        [0.4, 1.0, 1.0, 1.8, 2.3, 1.0], // 苔藓
+        [0.2, 0.3, 1.0, 1.5, 3.4, 1.0], // 草本
+        [0.1, 0.1, 0.3, 1.0, 1.3, 0.3], // 灌木
+        [0.01, 0.01, 0.05, 0.1, 1.0, 0.05], // 乔木
+        [0.2, 0.3, 1.0, 1.5, 3.4, 1.0]  // 农作物
     ],
 
-    // 土壤响应乘子 (soilMult[k][depth])：不同土壤深度对 K 的修正系数
+    // 土壤响应乘子 (soilMult[k][depth])：不同土壤深度对 K 的修正修正系数
     soilMult: [
-        [1.0, 0.8, 0.6],  // 地衣: 偏好浅土
-        [1.0, 1.0, 1.0],  // 苔藓: 适应性广
-        [0.4, 0.7, 0.8],  // 草本: 偏好深土
-        [0.4, 0.9, 1.0],  // 灌木: 依赖深土
-        [0.02, 0.3, 1.0]  // 乔木: 必须有深土
+        [1.0, 0.8, 0.6],  // 地衣
+        [1.0, 1.0, 1.0],  // 苔藓
+        [0.4, 0.7, 0.8],  // 草本
+        [0.4, 0.9, 1.0],  // 灌木
+        [0.02, 0.3, 1.0], // 乔木
+        [0.4, 0.7, 0.8]   // 农作物
     ],
-    thresholds: [0.0, 0.1, 0.4, 0.73, 0.85], 
-    icons: ['🪨', '🌱', '🌿', '🌳', '🌲'] // 物种对应的图标
+    thresholds: [0.0, 0.1, 0.4, 0.73, 0.85, 0.4], 
+    icons: ['🪨', '🌱', '🌿', '🌳', '🌲', '🌾'] // 物种对应的图标
 };
 
 class EcoSimulator {
-    constructor() {
+    constructor(climate) {
         try {
             this.gpu = typeof GPU.GPU === 'function' ? new GPU.GPU() : new GPU();
         } catch (e) {
@@ -64,6 +67,7 @@ class EcoSimulator {
         this.width = CONFIG.gridWidth;
         this.height = CONFIG.gridHeight;
         this.numSpecies = CONFIG.numSpecies;
+        this.currentClimate = climate || '热带雨林气候';
         this.forceMode = null; // 用户手动指定的模式: 'GPU', 'Worker', 'Serial', null
 
         this.biomass = new Float32Array(this.width * this.height * this.numSpecies);
@@ -79,15 +83,38 @@ class EcoSimulator {
         for (let i = 0; i < this.width * this.height; i++) {
             this.soilDepth[i] = Math.floor(Math.random() * 3);
         }
-        for (let y = 0; y < this.height; y++) {
-            for (let x = 0; x < this.width; x++) {
-                const idx = (y * this.width + x) * this.numSpecies;
-                for (let k = 0; k < this.numSpecies; k++) {
-                    this.seedBank[idx + k] = CONFIG.initialSeed[k];
-                    this.biomass[idx + k] = 0;
+
+        if (this.currentClimate === '农场') {
+            for (let y = 0; y < this.height; y++) {
+                for (let x = 0; x < this.width; x++) {
+                    const idx = (y * this.width + x) * this.numSpecies;
+                    // 重置种子库和生物量
+                    for (let k = 0; k < this.numSpecies; k++) {
+                        this.seedBank[idx + k] = CONFIG.initialSeed[k];
+                        this.biomass[idx + k] = 0;
+                    }
+                    // 边界生成混合植被: 草本 (index 2) 为主，少量灌木 (index 3) 和苔藓 (index 1)
+                    const isBorder = (x === 0 || x === this.width - 1 || y === 0 || y === this.height - 1);
+                    if (isBorder) {
+                        this.biomass[idx + 2] = 0.4 + Math.random() * 0.3; // 草本
+                        this.biomass[idx + 1] = 0.1 + Math.random() * 0.2; // 苔藓
+                        this.biomass[idx + 3] = 0.05 + Math.random() * 0.1; // 灌木
+                    } else {
+                        this.biomass[idx + 5] = 0.8 + Math.random() * 0.2; 
+                    }
                 }
-                if (Math.random() < 0.5) { 
-                    this.biomass[idx + 0] = Math.random() * 0.2 + 0.1; 
+            }
+        } else {
+            for (let y = 0; y < this.height; y++) {
+                for (let x = 0; x < this.width; x++) {
+                    const idx = (y * this.width + x) * this.numSpecies;
+                    for (let k = 0; k < this.numSpecies; k++) {
+                        this.seedBank[idx + k] = CONFIG.initialSeed[k];
+                        this.biomass[idx + k] = 0;
+                    }
+                    if (Math.random() < 0.5) { 
+                        this.biomass[idx + 0] = Math.random() * 0.2 + 0.1; 
+                    }
                 }
             }
         }
@@ -97,7 +124,8 @@ class EcoSimulator {
         if (!this.gpu) return;
         const w = this.width;
         const h = this.height;
-        const ns = 5; 
+        const ns = this.numSpecies; 
+        const ns2 = ns * 2;
 
         this.simulationKernel = this.gpu.createKernel(function(
             biomass, seedBank, soilDepth, climateMults, globalBiomass,
@@ -105,19 +133,19 @@ class EcoSimulator {
             alpha, soilMult, bgSeed, thresholds,
             randSeed, width, height
         ) {
-            const grid_x = Math.floor(this.thread.x / 10);
+            const grid_x = Math.floor(this.thread.x / this.constants.ns2);
             const grid_y = this.thread.y;
-            const species_idx = Math.floor((this.thread.x % 10) / 2);
+            const species_idx = Math.floor((this.thread.x % this.constants.ns2) / 2);
             const is_seed_bank_thread = this.thread.x % 2; 
 
-            const biomass_k = biomass[grid_y][grid_x * 5 + species_idx];
-            const seedBank_k = seedBank[grid_y][grid_x * 5 + species_idx];
+            const biomass_k = biomass[grid_y][grid_x * this.constants.ns + species_idx];
+            const seedBank_k = seedBank[grid_y][grid_x * this.constants.ns + species_idx];
             const depth = soilDepth[grid_y][grid_x];
 
             let totalB = 0.0;
             let compSum = 0.0;
-            const biomass_row_start = grid_x * 5;
-            for (let l = 0; l < 5; l++) {
+            const biomass_row_start = grid_x * this.constants.ns;
+            for (let l = 0; l < this.constants.ns; l++) {
                 let b_l = biomass[grid_y][biomass_row_start + l];
                 totalB += b_l;
                 compSum += alpha[species_idx][l] * b_l;
@@ -136,7 +164,7 @@ class EcoSimulator {
                         for (let dx = -12; dx <= 12; dx++) {
                             if (dx >= -r_limit && dx <= r_limit) {
                                 const nx = (grid_x + dx + width) % width;
-                                const sourceB = biomass[ny][nx * 5 + species_idx];
+                                const sourceB = biomass[ny][nx * this.constants.ns + species_idx];
                                 if (sourceB >= 0.001) {
                                     const distSq = dx * dx + dy * dy;
                                     const weight = Math.exp(-distSq / (2.0 * l_k * l_k));
@@ -166,17 +194,18 @@ class EcoSimulator {
                 return Math.max(0.0, b_growth + b_germ);
             }
         })
-        .setOutput([w * 10, h])
+        .setConstants({ ns, ns2 })
+        .setOutput([w * ns2, h])
         .setPipeline(true);
 
         this.normalizeKernel = this.gpu.createKernel(function(data) {
-            const grid_x = Math.floor(this.thread.x / 10);
+            const grid_x = Math.floor(this.thread.x / this.constants.ns2);
             const grid_y = this.thread.y;
             const is_seed_bank_thread = this.thread.x % 2;
-            const cell_start = grid_x * 10;
+            const cell_start = grid_x * this.constants.ns2;
 
             let totalB = 0.0;
-            for (let l = 0; l < 5; l++) {
+            for (let l = 0; l < this.constants.ns; l++) {
                 totalB += data[grid_y][cell_start + l * 2]; 
             }
 
@@ -186,7 +215,8 @@ class EcoSimulator {
             }
             return val;
         })
-        .setOutput([w * 10, h]);
+        .setConstants({ ns, ns2 })
+        .setOutput([w * ns2, h]);
 
         this.precomputedKernels = CONFIG.lambda.map(l => {
             const r = Math.ceil(l * 2);
@@ -292,10 +322,11 @@ class EcoSimulator {
     async step() {
         const yearlyFluctuation = 1.0 + (Math.random() * 0.3 - 0.15);
         const climateMults = {
-            '热带雨林气候': [1.0, 1.0, 1.0, 1.0, 1.0],
-            '温带草原气候': [1.0, 1.3, 1.0, 0.2, 0.0],
-            '寒带苔原气候': [1.0, 1.0, 0.3, 0.0, 0.0],
-            '荒漠气候': [1.0, 0.38, 0.05, 0.0, 0.0]
+            '热带雨林气候': [1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+            '农场': [1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+            '温带草原气候': [1.0, 1.3, 1.0, 0.2, 0.0, 1.0],
+            '寒带苔原气候': [1.0, 1.0, 0.3, 0.0, 0.0, 0.3],
+            '荒漠气候': [1.0, 0.38, 0.05, 0.0, 0.0, 0.05]
         };
         const currentMults = (climateMults[this.currentClimate] || climateMults['热带雨林气候']).map(m => m * yearlyFluctuation);
         
@@ -321,7 +352,7 @@ class EcoSimulator {
         if (Math.random() < 0.005) {
             const rx = Math.floor(Math.random() * this.width);
             const ry = Math.floor(Math.random() * this.height);
-            this.applyDisturbance(rx, ry, 3, [0.2, 0.3, 0.5, 0.7, 0.8], 0.2);
+            this.applyDisturbance(rx, ry, 3, [0.2, 0.3, 0.5, 0.7, 0.8, 0.5], 0.2);
         }
     }
 
@@ -364,7 +395,8 @@ class EcoSimulator {
     stepGPU(climateMults) {
         const w = this.width;
         const h = this.height;
-        const ns = 5;
+        const ns = this.numSpecies;
+        const ns2 = ns * 2;
 
         const globalBiomass = new Float32Array(ns);
         for (let i = 0; i < this.biomass.length; i += ns) {
@@ -393,7 +425,7 @@ class EcoSimulator {
             for (let gx = 0; gx < w; gx++) {
                 for (let k = 0; k < ns; k++) {
                     const idx = base + gx * ns + k;
-                    const res_idx = gx * 10 + k * 2;
+                    const res_idx = gx * ns2 + k * 2;
                     this.biomass[idx] = row[res_idx];
                     this.seedBank[idx] = row[res_idx + 1];
                 }
@@ -505,10 +537,10 @@ createApp({
             visualDisturbances: []
         });
 
-        const climates = ['热带雨林气候', '温带草原气候', '寒带苔原气候', '荒漠气候'];
+        const climates = ['热带雨林气候', '温带草原气候', '寒带苔原气候', '荒漠气候', '农场'];
 
         const init = () => {
-            simulator.value = new EcoSimulator();
+            simulator.value = new EcoSimulator(state.climate);
             
             const isGPU = !!(simulator.value.gpu && simulator.value.simulationKernel);
             const isWorker = !!(simulator.value.workers && simulator.value.workers.length > 0);
@@ -524,6 +556,7 @@ createApp({
             state.visualDisturbances = [];
             Vue.nextTick(() => {
                 initChart();
+                updateChart(); // 初始记录 Year 0 的数据
                 render();
             });
         };
@@ -619,8 +652,8 @@ createApp({
 
                         if (dominantK !== -1) {
                             ctx.globalAlpha = 0.6;
-                            // 草本 (dominantK === 2) 的图标大小保持恒定，其他物种随盖度变化
-                            const fontSize = (dominantK === 2) 
+                            // 草本 (index 2) 和 农作物 (index 5) 的图标大小保持恒定，其他物种随盖度变化
+                            const fontSize = (dominantK === 2 || dominantK === 5) 
                                 ? minCellSize * 0.7 
                                 : minCellSize * (0.3 + 0.7 * maxB);
                             ctx.font = `${fontSize}px Arial`;
@@ -654,7 +687,7 @@ createApp({
             const x = Math.floor((e.clientX - rect.left) / (rect.width / CONFIG.gridWidth));
             const y = Math.floor((e.clientY - rect.top) / (rect.height / CONFIG.gridHeight));
             const radius = 5;
-            simulator.value.applyDisturbance(x, y, radius, [0, 0, 0.95, 0.6, 0.5], 0.5);
+            simulator.value.applyDisturbance(x, y, radius, [0, 0, 0.95, 0.6, 0.5, 0.95], 0.5);
         };
 
         const handleMouseMove = (e) => {
@@ -667,10 +700,12 @@ createApp({
                 state.hoverData = {
                     x, y,
                     soil: ['浅', '中', '深'][simulator.value.soilDepth[y * CONFIG.gridWidth + x]],
-                    species: CONFIG.speciesNames.map((name, i) => ({
-                        name,
-                        val: (simulator.value.biomass[idx + i] * 100).toFixed(1) + '%'
-                    }))
+                    species: CONFIG.speciesNames
+                        .map((name, i) => ({
+                            name,
+                            val: (simulator.value.biomass[idx + i] * 100).toFixed(1) + '%'
+                        }))
+                        .filter((s, i) => i < 5 || state.climate === '农场')
                 };
             } else state.hoverData = null;
         };
@@ -690,7 +725,8 @@ createApp({
                         borderColor: CONFIG.colors[i],
                         backgroundColor: CONFIG.colors[i],
                         tension: 0.4,
-                        pointRadius: 0
+                        pointRadius: 0,
+                        hidden: (i === 5 && state.climate !== '农场')
                     }))
                 },
                 options: {
@@ -720,6 +756,7 @@ createApp({
                                 title: (items) => `年份 / YEAR: ${items[0].label}`,
                                 label: (item) => {
                                     const i = item.datasetIndex;
+                                    if (i === 5 && state.climate !== '农场') return null;
                                     const icon = CONFIG.icons[i];
                                     const name = CONFIG.speciesNames[i];
                                     const val = item.parsed.y.toFixed(1);
@@ -742,7 +779,12 @@ createApp({
                 }
             }
             chart.data.labels.push(state.year);
-            totals.forEach((t, i) => chart.data.datasets[i].data.push((t / count) * 100));
+            totals.forEach((t, i) => {
+                chart.data.datasets[i].data.push((t / count) * 100);
+                if (i === 5) {
+                    chart.data.datasets[i].hidden = (state.climate !== '农场');
+                }
+            });
             if (chart.data.labels.length > 50) {
                 chart.data.labels.shift();
                 chart.data.datasets.forEach(d => d.data.shift());
@@ -757,13 +799,13 @@ createApp({
             let radius = 5;
             if (type === 'fire') {
                 radius = 5;
-                simulator.value.applyDisturbance(cx, cy, radius, [0.4, 0.5, 0.78, 0.99, 1.0], 0.9);
+                simulator.value.applyDisturbance(cx, cy, radius, [0.4, 0.5, 0.78, 0.99, 1.0, 0.78], 0.9);
             } else if (type === 'volcano') {
                 radius = 17;
-                simulator.value.applyDisturbance(cx, cy, radius, [1, 1, 1, 1, 1], 1);
+                simulator.value.applyDisturbance(cx, cy, radius, [1, 1, 1, 1, 1, 1], 1);
             } else if (type === 'drought') {
                 radius = 40;
-                simulator.value.applyDisturbance(cx, cy, radius, [0.2, 0.3, 0.6, 0.3, 0.7], 0.2);
+                simulator.value.applyDisturbance(cx, cy, radius, [0.2, 0.3, 0.6, 0.3, 0.7, 0.6], 0.2);
             }
             state.visualDisturbances.push({ x: cx, y: cy, radius, type, startTime: Date.now(), duration: 1500 });
         };

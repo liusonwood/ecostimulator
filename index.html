@@ -178,7 +178,9 @@
                 <div class="flex-[3] border-l border-white/10 pl-6 flex flex-col justify-center gap-3">
                     <h3 class="text-xs uppercase tracking-widest text-white/40 mb-1">群落组成 / Legend</h3>
                     <div class="grid grid-cols-2 gap-x-4 gap-y-2">
-                        <div v-for="(name, i) in CONFIG.speciesNames" :key="name" class="flex items-center gap-2 text-xs">
+                        <div v-for="(name, i) in CONFIG.speciesNames" :key="name" 
+                             v-show="i < 5 || state.climate === '农场'" 
+                             class="flex items-center gap-2 text-xs">
                             <div class="w-6 h-6 flex items-center justify-center rounded bg-white/5 text-xs" :title="name">
                                 {{ CONFIG.icons[i] }}
                             </div>
