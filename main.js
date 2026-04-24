@@ -80,8 +80,41 @@ class EcoSimulator {
     }
 
     initGrid() {
-        for (let i = 0; i < this.width * this.height; i++) {
-            this.soilDepth[i] = Math.floor(Math.random() * 3);
+        const total = this.width * this.height;
+        let scores = new Float32Array(total);
+        for (let i = 0; i < total; i++) scores[i] = Math.random();
+
+        // 空间平滑处理：通过 3 轮均值模糊产生连续的“地貌势场”
+        for (let pass = 0; pass < 3; pass++) {
+            const nextScores = new Float32Array(total);
+            for (let y = 0; y < this.height; y++) {
+                for (let x = 0; x < this.width; x++) {
+                    let sum = 0;
+                    for (let dy = -1; dy <= 1; dy++) {
+                        for (let dx = -1; dx <= 1; dx++) {
+                            const nx = (x + dx + this.width) % this.width;
+                            const ny = (y + dy + this.height) % this.height;
+                            sum += scores[ny * this.width + nx];
+                        }
+                    }
+                    nextScores[y * this.width + x] = sum / 9;
+                }
+            }
+            scores = nextScores;
+        }
+
+        // 使用分位数映射：确保固定比例（30% 浅, 40% 中, 30% 深）
+        const indexedScores = Array.from(scores).map((v, i) => ({ v, i }));
+        indexedScores.sort((a, b) => a.v - b.v);
+
+        const p1 = Math.floor(total * 0.3); // 浅土阈值
+        const p2 = Math.floor(total * 0.7); // 中土阈值
+
+        for (let i = 0; i < total; i++) {
+            const gridIdx = indexedScores[i].i;
+            if (i < p1) this.soilDepth[gridIdx] = 0;      // 浅
+            else if (i < p2) this.soilDepth[gridIdx] = 1; // 中
+            else this.soilDepth[gridIdx] = 2;             // 深
         }
 
         if (this.currentClimate === '农场') {
@@ -639,11 +672,11 @@ createApp({
             const ch = canvas.height / height;
             const minCellSize = Math.min(cw, ch);
 
-            ctx.fillStyle = '#171717';
+            ctx.fillStyle = '#111';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+            ctx.strokeStyle = 'rgba(255,255,255,0.03)';
             ctx.lineWidth = 1;
 
             for (let gy = 0; gy < height; gy++) {
@@ -653,8 +686,11 @@ createApp({
                     const px = gx * cw;
                     const centerX = px + cw / 2;
                     const idx = (gy * width + gx) * CONFIG.numSpecies;
+                    const depth = simulator.value.soilDepth[gy * width + gx];
                     
-                    let r = 17, g = 17, b = 17;
+                    // 统一背景基准色，不再随土壤深度变化
+                    const baseR = 17, baseG = 17, baseB = 17;
+                    let r = baseR, g = baseG, b = baseB;
                     let totalB = 0;
                     let maxB = 0;
                     let dominantK = -1;
@@ -663,9 +699,9 @@ createApp({
                         const biomass = simulator.value.biomass[idx + k];
                         if (biomass > 0.01) {
                             const c = speciesRgb[k];
-                            r += (c.r - 17) * biomass;
-                            g += (c.g - 17) * biomass;
-                            b += (c.b - 17) * biomass;
+                            r += (c.r - baseR) * biomass;
+                            g += (c.g - baseG) * biomass;
+                            b += (c.b - baseB) * biomass;
                             totalB += biomass;
                             if (biomass > maxB) {
                                 maxB = biomass;
@@ -674,21 +710,19 @@ createApp({
                         }
                     }
 
-                    if (totalB > 0.01) {
-                        ctx.fillStyle = `rgb(${r|0},${g|0},${b|0})`;
-                        ctx.fillRect(px, py, cw, ch);
-                        ctx.strokeRect(px, py, cw, ch);
+                    // 绘制统一背景
+                    ctx.fillStyle = `rgb(${r|0},${g|0},${b|0})`;
+                    ctx.fillRect(px, py, cw, ch);
+                    ctx.strokeRect(px, py, cw, ch);
 
-                        if (dominantK !== -1) {
-                            ctx.globalAlpha = 0.6;
-                            // 草本 (index 2) 和 农作物 (index 5) 的图标大小变化幅度小，其他物种随盖度变化
-                            const fontSize = (dominantK === 2 || dominantK === 5) 
-                                ? minCellSize * (0.7 + 0.3 * maxB)
-                                : minCellSize * (0.3 + 0.7 * maxB);
-                            ctx.font = `${fontSize}px Arial`;
-                            ctx.fillText(CONFIG.icons[dominantK], centerX, centerY);
-                            ctx.globalAlpha = 1.0;
-                        }
+                    if (totalB > 0.01 && dominantK !== -1) {
+                        ctx.globalAlpha = 0.6;
+                        const fontSize = (dominantK === 2 || dominantK === 5) 
+                            ? minCellSize * (0.7 + 0.3 * maxB)
+                            : minCellSize * (0.3 + 0.7 * maxB);
+                        ctx.font = `${fontSize}px Arial`;
+                        ctx.fillText(CONFIG.icons[dominantK], centerX, centerY);
+                        ctx.globalAlpha = 1.0;
                     }
                 }
             }
